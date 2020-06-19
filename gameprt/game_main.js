@@ -17,67 +17,31 @@ let myindex;
 let socket;
 socket = io.connect('http://localhost:3000');
 
-
-
-///
-  // Sets the client's playername
-  const setplayername = () => {
-    playername = cleanInput($('.playernameInput').val().trim());
-
-    // If the playername is valid
-    if (playername) {
-        $('.login.page').fadeOut();
-        $('.lobby').fadeIn();
-        // $('.login.page').off('click');
-
-      // Tell the server your playername
-      socket.emit('add user', playername);
+//初期化
+let matMap = [];
+for(let ih=0; ih <opts.matY; ih++){
+    matMap[ih] = [];
+    for(let iw=0; iw <opts.matX; iw++){
+        matMap[ih][iw] = 0;
     }
-  }
-///
-
-$(window).keydown(event => {
-    // When the client hits ENTER on their keyboard
-    if (event.which === 13) {
-      if (playername) {
-        sendMessage();
-        socket.emit('stop typing');
-        typing = false;
-      } else {
-        setplayername();
-      }
-    }
-});
-
-//ロビー画面の表示
-  socket.on('entry', function(players){
-    // let entries = "<ul class='entries'>";
-    let entries = "<ul>";
-    for(let i = 0; i < players.length; i++){
-      entries += "<li>"+ (i+1) + " : " + players[i].name + "</li>";
-    }
-    entries += "</ul>"
-    $(".wrapper").html(entries);
-    myindex = players.findIndex(({name})=> name === playername);
-  
-    //ゲームの開始
-    $(".gamestart").click(()=>{
-      console.log("clicked")
-      console.log("My index is : "+ myindex);
-      //ゲーム画面表示メソッドを呼ぶ
-      socket.emit('gamestart');
-    });
-  });
+}
+//確認用////////////////////////
+matMap[1][1]=1;
+matMap[2][2]=1;
+matMap[3][3]=1;
+matMap[4][4]=1;
+////////////////////////////////
+console.log(matMap);
+let data={
+  arrX: 2,
+  arrY: 6,
+  matMap: matMap
+}
 //ゲーム画面表示
-  socket.on('gamestarts', function(players){
-    let nextrole = players[myindex].role; 
-    $('.lobby').fadeOut();
-    $('.pages').fadeOut();
-    console.log(nextrole);
-    // RUN();
+  socket.on('play', function(players){
+    // console.log(nextrole);
     // playgame(nextrole);
-    // let sc2 = new Scene2("hello");
-    sManager.showScene(Scene2,{h:'hey'});
+    sManager.showScene(Scene2,data);
     // sManager.showScene(ARROW);
     // location.href='src/arrow.html';
   });

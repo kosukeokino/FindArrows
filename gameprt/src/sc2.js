@@ -4,44 +4,25 @@ let opts = {
     cellSize : 50,        //マス目のサイズ(縦横同じ設定)
     matX : 10,        //マス目の横方向の数
     matY : 10,         //マス目の縦方向の数
-    originX : 200,          //マス目描画のX始点
+    originX : 250,          //マス目描画のX始点
     originY : 30,           //マス目描画のY始点
     choice : 5,              //鬼の選択数
     stamina : 5             //移動可能数
     }
-    let angle = 0;
 function Scene2(){
 
-    let testa;
-    let matMap = [];
     let arrow1;
 
 	this.setup = function(){
-        
-        
         background(100, 200, 100);
-        for(let ih=0; ih <opts.matY; ih++){
-            matMap[ih] = [];
-            for(let iw=0; iw <opts.matX; iw++){
-                matMap[ih][iw] = 0;
-            }
-        }
-        console.log(matMap);
-        arrow1 = new Arrow(3,2,'r');
-
 	}
 
 	this.draw = function(){
-        let tex =  this.sceneArgs;
-		textAlign(CENTER);
-        text(tex.h +' & '+ tex.s, width*0.5, height*0.5);
-        testa = tex;
+        let data =  this.sceneArgs;
+        arrow1 = new Arrow(data.arrX,data.arrY,'r');
         /////////////////////////////////////////
-        background(0,255,255);
-        matMap[3][4]=1;
-        matMap[1][3]=1;
-        matMap[1][4]=1;
-        matMap[5][6]=1;
+        background(0,0,0);
+
         for(let ih = 0; ih < opts.matY; ih++){
             stroke('black');
             strokeWeight(8);
@@ -49,10 +30,10 @@ function Scene2(){
                 let x = opts.originX + iw * opts.cellSize;
                 let y = opts.originY + ih * opts.cellSize;
                 //0<=matMap<1 ならマスを描画
-                if(0 <= matMap[ih][iw] && matMap[ih][iw] < 1){
+                if(0 <= data.matMap[ih][iw] && matMap[ih][iw] < 1){
                     rect(x,y,opts.cellSize,opts.cellSize); 
                 }
-                if(matMap[ih][iw]==0.5){
+                if(data.matMap[ih][iw]==0.5){
                         sHexag(x+opts.cellSize/2, y+opts.cellSize/2,15,'red',5);
                 }
             }
@@ -63,7 +44,6 @@ function Scene2(){
 
 	this.mousePressed = function(){
         console.log('bf');
-        socket.emit("test",testa);
         console.log('af');
         // this.sceneManager.showNextScene();
     }
@@ -78,22 +58,23 @@ function Scene2(){
             this.xc_prv = this.xc;
             this.yc_prv = this.yc;
             this.mvCounter = opts.stamina;
+            this.angle;
             switch(d0){
                 case 'l':
-                    angle = 270;
+                    this.angle = 270;
                     break;
                 case 'r':
-                    angle = 90;
+                    this.angle = 90;
                     break;
                 case 'd':
-                    angle = 180;
+                    this.angle = 180;
                     break
                 case 'u':
                 default:
-                    angle = 0;
+                    this.angle = 0;
                     break;
             }
-            this.angle_prv = angle;
+            this.angle_prv = this.angle;
         }
         show() {
             push();
@@ -102,7 +83,7 @@ function Scene2(){
             strokeWeight(2);
             translate(this.xc, this.yc);
             // translate(100, 100);
-            rotate(radians(angle));
+            rotate(radians(this.angle));
             let h = 3/8;
             let w = 1/4;
             triangle(-opts.cellSize*w ,opts.cellSize*h, 0, -opts.cellSize*h, opts.cellSize*w, opts.cellSize*h);
@@ -111,36 +92,36 @@ function Scene2(){
         turn(){
             if(this.mvCounter > 0){
                 if        (keyCode === 37) {
-                    if(angle === 270 && this.xc > opts.originX+opts.cellSize){
+                    if(this.angle === 270 && this.xc > opts.originX+opts.cellSize){
                         this.xc -= opts.cellSize;
-                    } else if(angle === 270 && this.xc < opts.originX+opts.cellSize){
+                    } else if(this.angle === 270 && this.xc < opts.originX+opts.cellSize){
                         mvCounter++;
                     } else {
-                        angle = 270;
+                        this.angle = 270;
                     }
                 } else if (keyCode === 38) {
-                    if(angle === 0 && this.yc > opts.originY+opts.cellSize){
+                    if(this.angle === 0 && this.yc > opts.originY+opts.cellSize){
                         this.yc -= opts.cellSize;
-                    } else if(angle === 0 && this.yc < opts.originY+opts.cellSize){
+                    } else if(this.angle === 0 && this.yc < opts.originY+opts.cellSize){
                         mvCounter++;
                     } else {
-                        angle = 0;
+                        this.angle = 0;
                     }
                 } else if (keyCode === 39) {
-                    if(angle === 90 && this.xc < opts.originX+(opts.matX-1)*opts.cellSize){
+                    if(this.angle === 90 && this.xc < opts.originX+(opts.matX-1)*opts.cellSize){
                         this.xc += opts.cellSize;
-                    } else if(angle === 90 && this.xc > opts.originX+(opts.matX-1)*opts.cellSize){
+                    } else if(this.angle === 90 && this.xc > opts.originX+(opts.matX-1)*opts.cellSize){
                         mvCounter++;
                     } else {
-                        angle = 90;
+                        this.angle = 90;
                     }
                 } else if (keyCode === 40) {
-                    if(angle === 180 && this.yc < opts.originY+(opts.matY-1)*opts.cellSize){
+                    if(this.angle === 180 && this.yc < opts.originY+(opts.matY-1)*opts.cellSize){
                         this.yc += opts.cellSize;
-                    } else if(angle === 180 && this.yc > opts.originY+(opts.matY-1)*opts.cellSize){
+                    } else if(this.angle === 180 && this.yc > opts.originY+(opts.matY-1)*opts.cellSize){
                         mvCounter++;
                     } else {
-                        angle = 180;
+                        this.angle = 180;
                     }
                 }
                 this.mvCounter--;
@@ -160,7 +141,7 @@ function Scene2(){
                 this.mvCounter = opts.stamina;
                 this.xc = this.xc_prv;
                 this.yc = this.yc_prv;
-                angle = this.angle_prv;
+                this.angle = this.angle_prv;
             }
         }
     }
